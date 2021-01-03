@@ -1,4 +1,4 @@
-import { createHandler, createSequencer, seq } from '../../../lib/seq'
+import { createResolver, createSequencer, seq } from '../../../lib/index'
 
 function timeout(time: number) {
   return new Promise((resolve) => setTimeout(resolve, time))
@@ -194,7 +194,7 @@ describe('Sequence 2.0', () => {
 
   it('Can be used to create custom sequencers', async () => {
     const customSeq = createSequencer([
-      createHandler<number>({
+      createResolver<number>({
         test(x: any): x is number {
           return typeof x === 'number'
         },
@@ -211,6 +211,8 @@ describe('Sequence 2.0', () => {
     ])
     let i = 0
 
+    /* Typescript errors because we are yielding a promise when promises are not resolved by this sequencer */
+    // @ts-ignore
     let effect = customSeq(function* () {
       i++
       // This sequencer doesnt handle promises so this is passed through in sync
