@@ -1,10 +1,10 @@
-import { createResolver, isNumber } from '../sequencer'
+import { createHandler, isNumber } from '../sequencer'
 
 /* 
 Yielded numbers will be resolved as timeout lengths. The task will wait for the timeout to complete before resuming
 If it is cancelled the actual timeout will be cleared
 */
-export const timeoutHandler = createResolver({
+export const timeoutHandler = createHandler({
   test: isNumber,
   handle(time) {
     let tm

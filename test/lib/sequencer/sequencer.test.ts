@@ -1,4 +1,4 @@
-import { createResolver, createSequencer, seq } from '../../../lib/index'
+import { createHandler, createSequencer, seq } from '../../../lib/index'
 
 function timeout(time: number) {
   return new Promise((resolve) => setTimeout(resolve, time))
@@ -17,7 +17,26 @@ describe('Sequence 2.0', () => {
     effect()
     await effect().finished()
 
-    expect(mockFn).toBeCalledTimes(1)
+    expect(mockFn).toHaveBeenCalledTimes(1)
+  })
+  it('Cancels subsequent runs with callbacks', async () => {
+    let mockFn = jest.fn()
+
+    let effect = seq(function* () {
+      let resolved = yield (next) => {
+        setTimeout(() => next(true), 300)
+      }
+
+      if (resolved === true) {
+        mockFn()
+      }
+    })
+
+    effect()
+    effect()
+    await effect().finished()
+
+    expect(mockFn).toHaveBeenCalledTimes(1)
   })
   it('Cancels subsequent runs with promises', async () => {
     let mockFn = jest.fn(() => {})
@@ -31,7 +50,7 @@ describe('Sequence 2.0', () => {
     effect()
     await effect().finished()
 
-    expect(mockFn).toBeCalledTimes(1)
+    expect(mockFn).toHaveBeenCalledTimes(1)
   })
   it('Runs code before initial yield immediately', async () => {
     let mockFn = jest.fn(() => {})
@@ -194,7 +213,7 @@ describe('Sequence 2.0', () => {
 
   it('Can be used to create custom sequencers', async () => {
     const customSeq = createSequencer([
-      createResolver<number>({
+      createHandler<number>({
         test(x: any): x is number {
           return typeof x === 'number'
         },

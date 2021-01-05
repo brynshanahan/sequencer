@@ -1,5 +1,5 @@
 import {
-  createResolver,
+  createHandler,
   isArray,
   runHandler,
   SequenceStep,
@@ -10,7 +10,7 @@ import {
 Yielding an array is essentially short hand for promise.all 
 (it runs all the values that you can normally yield in "parallel" rather than in sequence)
 */
-export const arrayHandler = createResolver({
+export const arrayHandler = createHandler({
   test: isArray,
   handle(arr, handlers) {
     let steps: Set<SequenceStep> = new Set()

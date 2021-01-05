@@ -223,7 +223,7 @@ export function runGenerator(
 }
 
 /* Add a handler that all sequences will use by default */
-export function createResolver<T, TResult = T>(
+export function createHandler<T, TResult = T>(
   handler: GeneratorValueHandler<T, TResult>
 ) {
   return handler
