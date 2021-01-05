@@ -4,6 +4,8 @@ Sequencer is a library that aims to simplify sequences of asyncronous tasks. It 
 
 By default this library comes with a sequencer that is setup to resolve promises, numbers (which are resolved as timeouts), requestAnimationFrame, generic callbacks, and arrays (which are resolved by going through and resolves each value in parallel)
 
+---
+
 ## Example usage
 
 ### Default Sequencer
@@ -110,3 +112,10 @@ task.stop()
 runAnimation()
 runAnimation()
 ```
+
+### Contributing
+
+The library uses Jest for testing, just run `npm run test`. If you find any issues feel free to submit an issue and send a pr if you have anything to contribute!
+
+**Where to help:**
+I would especially appreciate help around typing values returned from yield statements. Right now the yield statement returns a union of all the results from sequence handlers and because one of them is "`unknown`" (the callback handler) it results in them all being unknown
