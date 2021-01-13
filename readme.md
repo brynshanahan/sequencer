@@ -113,6 +113,51 @@ runAnimation()
 runAnimation()
 ```
 
+### React hook
+
+```tsx
+import { useSeq } from './sequencer'
+
+export function Autocomplete () {
+  let [input, setInput] = useState('')
+
+  let [results, effect] = useSeq(
+    function* () {
+      /* Wait for 120 seconds after every input */
+      yield 120
+
+      let response = yield fetch(`get-results?q=${input}`)
+      let json = yield response.json()
+
+      let value = []
+
+      let last = performance.now()
+      for (let row of results) {
+        /* Give oppotunity to break every thousand rows */
+        if (performance.now() - last > framebudget) {
+          last = yield requestAnimationFrame
+        }
+
+        value.push(heavyProcessingFunction(row))
+      }
+
+      return value
+    },
+    [input]
+  )
+
+  return (
+    <div>
+      <input type="text" onChange={e => setInput(e.target.value)} value={input}>
+      {
+        results && <ul>{results.map((item) => <li key={item.id}>{item.value}</li>)}</ul>
+      }
+    </div>
+  )
+}
+
+```
+
 ### Contributing
 
 The library uses Jest for testing, just run `npm run test`. If you find any issues feel free to submit an issue and send a pr if you have anything to contribute!

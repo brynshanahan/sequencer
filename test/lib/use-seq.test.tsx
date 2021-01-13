@@ -18,12 +18,13 @@ afterEach(() => {
 
 function DemoComponent({ callback }) {
   let [run, setRun] = useState(0)
-  let [result, setResult] = useState("Hasn't completed")
-  useSeq(
+  let [result, setResult] = useState('a')
+  let [value] = useSeq(
     function* () {
       yield 100
       callback()
-      setResult('Has completed')
+      setResult('b')
+      return 'c'
     },
     [run]
   )
@@ -36,8 +37,13 @@ function DemoComponent({ callback }) {
     }
   }, [])
 
-  // @ts-ignore jsx issue
-  return <div id='result'>{result}</div>
+  return (
+    // @ts-ignore jsx issue
+    <>
+      <div id='result'>{result}</div>
+      <div id='value'>{value}</div>
+    </>
+  )
 }
 
 describe('Sequencer react hook', () => {
@@ -47,12 +53,13 @@ describe('Sequencer react hook', () => {
     await act(async () => {
       render(<DemoComponent callback={mockFn} />, container)
 
+      expect(container.querySelector('#result').textContent).toEqual('a')
+
       await new Promise((resolve) => setTimeout(resolve, 250))
     })
 
-    expect(container.querySelector('#result').textContent).toEqual(
-      'Has completed'
-    )
+    expect(container.querySelector('#result').textContent).toEqual('b')
+    expect(container.querySelector('#value').textContent).toEqual('c')
     expect(mockFn).toBeCalledTimes(1)
   })
 })
