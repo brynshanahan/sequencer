@@ -1,7 +1,6 @@
 export {
   createHandler,
   createSequencer,
-  runGenerator,
   runHandler,
   runSequence,
 } from './sequencer'
@@ -13,3 +12,4 @@ export { frameHandler } from './handlers/frame-handler'
 export { functionHandler } from './handlers/function-handler'
 
 export { seq } from './seq'
+export { useSeq } from './react/use-seq'

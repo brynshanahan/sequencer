@@ -16,14 +16,14 @@ export function isArray(x: any): x is any[] {
   return Array.isArray(x)
 }
 
-type NextCallback<T> = (value: T) => any
+export type NextCallback<T> = (value: T) => any
 type CancelCallback = () => any
 
 export interface SequenceStep<TResult = any> {
   cancel: CancelCallback
   finished: (next: NextCallback<TResult>) => any
 }
-interface GeneratorValueHandler<TYield, TResult = TYield> {
+export interface GeneratorValueHandler<TYield, TResult = TYield> {
   test(arg: any): arg is TYield
   handle(
     arg: TYield,
@@ -31,15 +31,17 @@ interface GeneratorValueHandler<TYield, TResult = TYield> {
   ): SequenceStep<TResult>
 }
 
-interface GeneratorInterface<T = any> {
+export interface GeneratorInterface<TResult> {
   pause(): any
   play(): any
   stop(): any
-  finished(): Promise<T>
-  onComplete(callback: (param?: T) => any)
+  finished(): Promise<TResult>
+  onComplete(callback: (param?: TResult) => any)
   isPaused(): boolean
   isComplete(): boolean
 }
+
+export const handlerKey = Symbol('handlers')
 
 export const createEmptyGeneratorInterface = (value) => ({
   pause() {},
@@ -101,10 +103,14 @@ This function is passed a Generator (rather than a generator factory)
 and is responsible for running through each step in the generator
 it is also responsible for returning the task api (pause, play, stop)
 */
-export function runSequence<Genny extends Generator<TYield>, TYield>(
+export function runSequence<
+  Genny extends Generator<TYield, TResult>,
+  TYield = any,
+  TResult = any
+>(
   generator: Genny,
   handlers
-): GeneratorInterface<TYield | undefined> {
+): GeneratorInterface<TYield | TResult | undefined> {
   /* Bail early if we don't have a generator */
   if (!isGenerator(generator)) {
     return createEmptyGeneratorInterface(generator)
@@ -117,9 +123,11 @@ export function runSequence<Genny extends Generator<TYield>, TYield>(
 
   /* This will be a nextStep function when the sequence is paused */
   let unpauseCallback: undefined | (() => any)
-  let onCompleteCallbacks: ((param?: TYield | TYield) => any)[] = []
+  let onCompleteCallbacks: ((
+    param?: TYield | TResult | undefined
+  ) => any)[] = []
 
-  let complete = new Promise<TYield | undefined>((resolve) => {
+  let complete = new Promise<TYield | TResult | undefined>((resolve) => {
     function nextStep(param?: any) {
       /* Bail early if we are paused (and set unpause to a callback that continues this process) */
       if (isPaused) {
@@ -182,48 +190,60 @@ export function runSequence<Genny extends Generator<TYield>, TYield>(
   }
 }
 
-type ExtractGeneric<Type> = Type extends GeneratorValueHandler<infer X>[]
+export type ExtractGeneric<Type> = Type extends GeneratorValueHandler<infer X>[]
   ? X
   : never
 
-type ExtractSecondGeneric<TYield, Type> = Type extends GeneratorValueHandler<
+export type ExtractSecondGeneric<
   TYield,
-  infer X
->
-  ? X
-  : never
+  Type
+> = Type extends GeneratorValueHandler<TYield, infer X> ? X : never
 
-export function createSequencer<
+export type CreateSequenceType = <
   Handlers extends GeneratorValueHandler<any>[],
   TYield = ExtractGeneric<Handlers>,
   TValue = ExtractSecondGeneric<TYield, GeneratorValueHandler<TYield>>
->(handlers: Handlers) {
-  return function <
-    T extends (...args: any[]) => Generator<TYield, any, TValue>
-  >(generator: T) {
-    let prevSequence: GeneratorInterface<TYield | undefined>
-    return (...args) => {
-      /* Cancel the previously running sequence */
-      if (prevSequence) {
-        prevSequence.stop()
-      }
-
-      /* Run the sequence */
-      prevSequence = runSequence(generator(...args), handlers)
-      return prevSequence
-    }
+>(
+  handlers: Handlers
+) => {
+  [handlerKey]: Handlers
+  /* Sequence callback */
+  <T extends (...args: any[]) => Generator<TYield, any, TValue>>(
+    generator: T
+  ): {
+    /* Returns function that creates the generator interface */
+    (...args: any[]): GeneratorInterface<TYield>
   }
 }
 
-export function runGenerator(
-  generatorFunction: GeneratorFunction,
-  handlers: GeneratorValueHandler<any>[]
-) {
-  return runSequence(generatorFunction(), handlers)
+export const createSequencer: CreateSequenceType = <Handlers, TYield, TValue>(
+  handlers: Handlers
+) => {
+  /* Create the  */
+  let sequenceCallback = Object.assign(
+    function <T extends (...args: any[]) => Generator<TYield, any, TValue>>(
+      generator: T
+    ) {
+      let prevSequence: GeneratorInterface<TYield>
+      return (...args) => {
+        /* Cancel the previously running sequence */
+        if (prevSequence) {
+          prevSequence.stop()
+        }
+
+        /* Run the sequence */
+        prevSequence = runSequence(generator(...args), handlers)
+        return prevSequence
+      }
+    },
+    { [handlerKey]: handlers }
+  )
+
+  return sequenceCallback
 }
 
 /* Add a handler that all sequences will use by default */
-export function createHandler<T, TResult = T>(
+export function createHandler<T, TResult extends any = T>(
   handler: GeneratorValueHandler<T, TResult>
 ) {
   return handler

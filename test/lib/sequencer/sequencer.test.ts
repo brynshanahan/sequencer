@@ -4,7 +4,7 @@ function timeout(time: number) {
   return new Promise((resolve) => setTimeout(resolve, time))
 }
 
-describe('Sequence 2.0', () => {
+describe('Sequencer', () => {
   it('Cancels subsequent runs using timeouts', async () => {
     let mockFn = jest.fn(() => {})
 
@@ -213,7 +213,7 @@ describe('Sequence 2.0', () => {
 
   it('Can be used to create custom sequencers', async () => {
     const customSeq = createSequencer([
-      createHandler<number>({
+      createHandler<number, number>({
         test(x: any): x is number {
           return typeof x === 'number'
         },
@@ -230,15 +230,17 @@ describe('Sequence 2.0', () => {
     ])
     let i = 0
 
-    /* Typescript errors because we are yielding a promise when promises are not resolved by this sequencer */
+    /* 
+    Intentional typescript error.
+    Typescript errors because we are yielding a promise they are not handled by customSeq */
     // @ts-ignore
     let effect = customSeq(function* () {
       i++
-      // This sequencer doesnt handle promises so this is passed through in sync
+      // This sequencer doesnt handle promises so this is continued through in sync
       yield timeout(20)
       i++
       // It does handle timeouts though so this causes a set timeout
-      yield 100
+      let value = yield 100
       i++
     })
 
