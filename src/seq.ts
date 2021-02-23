@@ -13,7 +13,3 @@ export const seq = createSequencer([
   functionHandler,
   arrayHandler,
 ])
-
-seq(function* () {
-  yield 'asdf'
-})

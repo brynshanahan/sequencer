@@ -10,7 +10,7 @@ function isCallback<V>(x: any): x is Callback<V> {
   return isFunction(x)
 }
 
-export const functionHandler = createHandler({
+export const functionHandler = createHandler<Function>({
   test: isCallback,
   handle<C extends Callback<U>, U>(onCompleteCallback: C): SequenceStep<U> {
     let isCancelled = false
