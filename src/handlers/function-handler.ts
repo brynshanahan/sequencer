@@ -5,12 +5,12 @@ import {
   SequenceStep,
 } from '../sequencer'
 
-type Callback<V> = (next: NextCallback<V>) => any
+type Callback<V = any> = (next: NextCallback<V>) => any
 function isCallback<V>(x: any): x is Callback<V> {
   return isFunction(x)
 }
 
-export const functionHandler = createHandler<Function>({
+export const functionHandler = createHandler<Callback>({
   test: isCallback,
   handle<C extends Callback<U>, U>(onCompleteCallback: C): SequenceStep<U> {
     let isCancelled = false

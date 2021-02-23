@@ -1,4 +1,4 @@
-import { createHandler, createSequencer, seq } from '../../../lib/index'
+import { createHandler, createSequencer, seq } from '../../../src/index'
 
 function timeout(time: number) {
   return new Promise((resolve) => setTimeout(resolve, time))

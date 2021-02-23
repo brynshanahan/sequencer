@@ -1,3 +1,5 @@
+import { handlerKey } from './handler-key'
+
 export function isGenerator(x: any): x is Generator<any> {
   return typeof x?.next === 'function'
 }
@@ -16,7 +18,7 @@ export function isArray(x: any): x is any[] {
   return Array.isArray(x)
 }
 
-export type NextCallback<T> = (value: T) => any
+export type NextCallback<T> = (value?: T) => any
 type CancelCallback = () => any
 
 export interface SequenceStep<TResult = any> {
@@ -40,9 +42,6 @@ export interface GeneratorInterface<TResult> {
   isPaused(): boolean
   isComplete(): boolean
 }
-
-export const handlerKey = Symbol('handlers')
-export type HandlerKey = typeof handlerKey
 
 export const createEmptyGeneratorInterface = (value: any) => ({
   pause() {},
@@ -207,7 +206,6 @@ export type CreateSequenceType = <
 >(
   handlers: Handlers
 ) => {
-  [handlerKey]: Handlers
   /* Sequence callback */
   <T extends (...args: any[]) => Generator<TYield, any, TValue>>(
     generator: T

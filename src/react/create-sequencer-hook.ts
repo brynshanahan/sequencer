@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
+import { handlerKey } from '../handler-key'
 import {
-  handlerKey,
   CreateSequenceType,
   runSequence,
   GeneratorInterface,

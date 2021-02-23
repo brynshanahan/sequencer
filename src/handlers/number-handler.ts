@@ -7,7 +7,7 @@ If it is cancelled the actual timeout will be cleared
 export const timeoutHandler = createHandler({
   test: isNumber,
   handle(time) {
-    let tm
+    let tm: ReturnType<typeof setTimeout>
     return {
       finished: (next) => setTimeout(() => next(time), time),
       cancel: () => clearTimeout(tm),
