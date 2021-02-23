@@ -36,14 +36,15 @@ export interface GeneratorInterface<TResult> {
   play(): any
   stop(): any
   finished(): Promise<TResult>
-  onComplete(callback: (param?: TResult) => any)
+  onComplete(callback: (param?: TResult) => any): any
   isPaused(): boolean
   isComplete(): boolean
 }
 
 export const handlerKey = Symbol('handlers')
+export type HandlerKey = typeof handlerKey
 
-export const createEmptyGeneratorInterface = (value) => ({
+export const createEmptyGeneratorInterface = (value: any) => ({
   pause() {},
   play() {},
   isPaused() {
@@ -104,12 +105,12 @@ and is responsible for running through each step in the generator
 it is also responsible for returning the task api (pause, play, stop)
 */
 export function runSequence<
-  Genny extends Generator<TYield, TResult>,
-  TYield = any,
-  TResult = any
+  Handlers extends GeneratorValueHandler<any, any>[],
+  TYield = ExtractGeneric<Handlers>,
+  TResult = ExtractSecondGeneric<TYield, GeneratorValueHandler<TYield>>
 >(
-  generator: Genny,
-  handlers
+  generator: Generator<TYield, TResult>,
+  handlers: Handlers
 ): GeneratorInterface<TYield | TResult | undefined> {
   /* Bail early if we don't have a generator */
   if (!isGenerator(generator)) {
@@ -200,7 +201,7 @@ export type ExtractSecondGeneric<
 > = Type extends GeneratorValueHandler<TYield, infer X> ? X : never
 
 export type CreateSequenceType = <
-  Handlers extends GeneratorValueHandler<any>[],
+  Handlers extends GeneratorValueHandler<any, any>[],
   TYield = ExtractGeneric<Handlers>,
   TValue = ExtractSecondGeneric<TYield, GeneratorValueHandler<TYield>>
 >(
@@ -225,14 +226,17 @@ export const createSequencer: CreateSequenceType = <Handlers, TYield, TValue>(
       generator: T
     ) {
       let prevSequence: GeneratorInterface<TYield>
-      return (...args) => {
+      return (...args: any[]) => {
         /* Cancel the previously running sequence */
         if (prevSequence) {
           prevSequence.stop()
         }
 
         /* Run the sequence */
-        prevSequence = runSequence(generator(...args), handlers)
+        prevSequence = runSequence<Handlers, TYield, TValue>(
+          generator(...args),
+          handlers
+        )
         return prevSequence
       }
     },

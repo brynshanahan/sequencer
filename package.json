@@ -1,17 +1,36 @@
 {
-  "name": "seq",
+  "name": "seqe",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/main/index.cjs.js",
+  "module": "dist/module/index.es.js",
+  "browser": "dist/umd/index.umd.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "prod": "rollup --config ./rollup.config.js",
+    "dev": "rollup --watch --config ./rollup.config.js"
   },
   "author": "",
   "license": "ISC",
-  "dependencies": {
+  "dependencies": {},
+  "peerDependencies": {
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1"
+  },
+  "optionalDependencies": {
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1"
+  },
+  "devDependencies": {
+    "jest": "^26.6.3",
+    "typescript": "^4.1.2",
+    "@rollup/plugin-commonjs": "^17.0.0",
+    "@rollup/plugin-node-resolve": "^11.1.0",
+    "@rollup/plugin-typescript": "^8.1.0",
+    "rollup": "^2.38.0",
     "@babel/plugin-proposal-class-properties": "^7.12.1",
     "@babel/plugin-transform-react-jsx": "^7.12.7",
     "@babel/plugin-transform-runtime": "^7.12.1",
@@ -20,10 +39,6 @@
     "@babel/preset-typescript": "^7.12.7",
     "@types/jest": "^26.0.19",
     "@types/react": "^17.0.0",
-    "@types/react-dom": "^17.0.0",
-    "jest": "^26.6.3",
-    "react": "^17.0.1",
-    "react-dom": "^17.0.1",
-    "typescript": "^4.1.2"
+    "@types/react-dom": "^17.0.0"
   }
 }

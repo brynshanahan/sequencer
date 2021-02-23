@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { render, unmountComponentAtNode } from 'react-dom'
-import { useSeq } from '../../lib/react/use-seq'
+import { useSeq } from '../../src/react/use-seq'
 import { act } from 'react-dom/test-utils'
 let container: HTMLDivElement = null
 beforeEach(() => {

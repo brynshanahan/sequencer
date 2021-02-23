@@ -3,7 +3,7 @@ import { frameHandler } from './handlers/frame-handler'
 import { functionHandler } from './handlers/function-handler'
 import { timeoutHandler } from './handlers/number-handler'
 import { promiseHandler } from './handlers/promise-handler'
-import { createSequencer } from './sequencer'
+import { createSequencer, handlerKey } from './sequencer'
 
 /* Create the default sequence handler (called seq) */
 export const seq = createSequencer([
@@ -13,3 +13,7 @@ export const seq = createSequencer([
   functionHandler,
   arrayHandler,
 ])
+
+seq(function* () {
+  yield 'asdf'
+})
