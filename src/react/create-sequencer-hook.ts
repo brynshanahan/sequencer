@@ -23,20 +23,20 @@ export function createSequencerHook<
     TGen = ReturnType<GennFunction>,
     TYield = ExtractYield<TGen>,
     TResult = ExtractResult<TGen>
-  >(generatorFn: GennFunction, cacheKeys?: any[]) {
+  >(generatorFn: GennFunction, cacheKeys: any[] = []) {
     let [effect, setProcess] = useState<GeneratorInterface<TYield>>(undefined)
-    let [result, setResult] = useState(null as null | TYield | TResult)
+    let [result, setResult] = useState<undefined | TResult>(undefined)
 
     useEffect(() => {
-      let effect = runSequence(generatorFn() as any, handlers)
+      let effect = runSequence(generatorFn(), handlers)
 
-      setProcess(effect)
+      setProcess(() => effect)
       setResult(null)
-      effect.finished().then((result) => setResult(result))
+      effect.finished().then((r) => setResult(r))
 
       return effect.stop
     }, cacheKeys)
 
-    return [result, effect] as [typeof result, typeof effect]
+    return [result, effect] as const
   }
 }
