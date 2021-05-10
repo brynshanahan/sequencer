@@ -13,3 +13,4 @@ export { functionHandler } from './handlers/function-handler'
 
 export { seq } from './seq'
 export { useSeq } from './react/use-seq'
+export { createSequencerHook } from './react/create-sequencer-hook'
