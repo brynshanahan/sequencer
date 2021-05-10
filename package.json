@@ -2,6 +2,9 @@
   "name": "seqe",
   "version": "1.0.81",
   "description": "",
+  "repository": {
+    "url": "https://github.com/brynshanahan/sequencer"
+  },
   "main": "dist/main/index.js",
   "module": "dist/module/index.js",
   "umd": "dist/umd/seqe.js",

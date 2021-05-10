@@ -13,7 +13,7 @@ By default this library comes with a sequencer that is setup to resolve promises
 In this example the button creates a new task every time it is clicked and any previous tasks are cancelled. So if you clicked the button twice in a row it would still only log "Done!" once. The benefit of using seq is that you dont have to worry about handling an isCancelled variable or managing your own timeouts because that is all handled by the sequencer.
 
 ```ts
-import { seq } from './sequencer'
+import { seq } from 'seqe'
 /* ... */
 
 button.addEventListener(
@@ -48,12 +48,17 @@ button.addEventListener(
 _setup.ts_
 
 ```ts
-import { createSequencer, createResolver, numberHandler } from './sequencer'
+import {
+  createSequencer,
+  createHandler,
+  timeoutHandler,
+  createSequencerHook,
+} from 'seqe'
 
 export const animSequencer = createSequencer([
   // Create a resolver that can handle instances of window.Animation (built in web animations)
-  createResolver({
-    test(value) {
+  createHandler({
+    test(value): value is Animation {
       return value instanceof window.Animation
     },
     handle(animation) {
@@ -69,8 +74,10 @@ export const animSequencer = createSequencer([
       }
     },
   }),
-  numberHandler,
+  timeoutHandler,
 ])
+
+export const useAnimSequencer = createSequencerHook(animSequencer)
 ```
 
 _file.ts_
@@ -116,7 +123,7 @@ runAnimation()
 ### React hook
 
 ```tsx
-import { useSeq } from './sequencer'
+import { useSeq } from 'seqe'
 
 export function Autocomplete () {
   let [input, setInput] = useState('')
