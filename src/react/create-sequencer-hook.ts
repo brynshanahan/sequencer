@@ -1,10 +1,7 @@
 import { useState, useEffect } from 'react'
 import { handlerKey } from '../handler-key'
-import {
-  CreateSequenceType,
-  runSequence,
-  GeneratorInterface,
-} from '../sequencer'
+import { runSequence, GeneratorInterface } from '../sequencer'
+import type { createSequencer } from '../sequencer'
 
 type ExtractYield<Type> = Type extends Generator<any, any, infer Yield>
   ? Yield
@@ -14,8 +11,8 @@ type ExtractResult<Type> = Type extends Generator<any, infer Result, any>
   : never
 
 export function createSequencerHook<
-  SequencerCallback extends ReturnType<SequencerFunction>,
-  SequencerFunction extends CreateSequenceType = CreateSequenceType
+  SequencerFunction extends typeof createSequencer,
+  SequencerCallback extends ReturnType<SequencerFunction>
 >(sequencer: SequencerCallback) {
   let handlers = sequencer[handlerKey]
   return function useSequencer<
@@ -24,19 +21,23 @@ export function createSequencerHook<
     TYield = ExtractYield<TGen>,
     TResult = ExtractResult<TGen>
   >(generatorFn: GennFunction, cacheKeys: any[] = []) {
-    let [effect, setProcess] = useState<GeneratorInterface<TYield>>(undefined)
+    let [process, setProcess] =
+      useState<GeneratorInterface<TResult> | false>(undefined)
     let [result, setResult] = useState<undefined | TResult>(undefined)
 
     useEffect(() => {
-      let effect = runSequence(generatorFn(), handlers)
+      let currentProcess = runSequence(generatorFn(), handlers)
 
-      setProcess(() => effect)
+      setProcess(() => currentProcess)
       setResult(null)
-      effect.finished().then((r) => setResult(r))
+      currentProcess.onComplete((r) => {
+        setResult(() => r)
+        setProcess(() => undefined)
+      })
 
-      return effect.stop
+      return currentProcess.stop
     }, cacheKeys)
 
-    return [result, effect] as const
+    return [result, process] as const
   }
 }
