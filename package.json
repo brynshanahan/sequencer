@@ -1,6 +1,6 @@
 {
   "name": "seqe",
-  "version": "1.0.87",
+  "version": "1.0.88",
   "description": "",
   "repository": {
     "url": "https://github.com/brynshanahan/sequencer"
@@ -9,6 +9,7 @@
   "module": "dist/module/index.js",
   "umd": "dist/umd/seqe.js",
   "umdMin": "dist/umd/seqe.min.js",
+  "typings": "dist/main/index.d.ts",
   "sideEffects": false,
   "files": [
     "dist/"
