@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from 'react'
+import React, { createElement, Fragment, useEffect, useState } from 'react'
 import { render, unmountComponentAtNode } from 'react-dom'
-import { useSeq } from '../../src/react/use-seq'
+import { useSeq } from '../../../src/react/use-seq'
 import { act } from 'react-dom/test-utils'
+
 let container: HTMLDivElement = null
+
 beforeEach(() => {
   // setup a DOM element as a render target
   container = document.createElement('div')
@@ -16,7 +18,7 @@ afterEach(() => {
   container = null
 })
 
-function DemoComponent({ callback }) {
+function TestComponent({ callback }) {
   let [run, setRun] = useState(0)
   let [result, setResult] = useState('a')
   let [value] = useSeq(
@@ -37,13 +39,25 @@ function DemoComponent({ callback }) {
     }
   }, [])
 
-  return (
-    // @ts-ignore jsx issue
-    <>
-      <div id='result'>{result}</div>
-      <div id='value'>{value}</div>
-    </>
+  return createElement(
+    Fragment,
+    {},
+    createElement('div', { id: 'result' }, [result]),
+    createElement('div', { id: 'value' }, [value])
   )
+}
+
+function TestUnmountComponent({ callback }) {
+  let [state, set] = useState(0)
+  useSeq(
+    function* () {
+      yield 50
+      set((s) => s + 1)
+      callback()
+    },
+    [callback]
+  )
+  return null
 }
 
 describe('Sequencer react hook', () => {
@@ -51,7 +65,7 @@ describe('Sequencer react hook', () => {
     let mockFn = jest.fn(() => {})
 
     await act(async () => {
-      render(<DemoComponent callback={mockFn} />, container)
+      render(createElement(TestComponent, { callback: mockFn }), container)
 
       expect(container.querySelector('#result').textContent).toEqual('a')
 
@@ -61,5 +75,24 @@ describe('Sequencer react hook', () => {
     expect(container.querySelector('#result').textContent).toEqual('b')
     expect(container.querySelector('#value').textContent).toEqual('c')
     expect(mockFn).toBeCalledTimes(1)
+  })
+  it('Runs on mount', async () => {
+    let callback = jest.fn(() => {})
+    await act(async () => {
+      render(createElement(TestUnmountComponent, { callback }), container)
+      await new Promise((resolve) => setTimeout(resolve, 100))
+      unmountComponentAtNode(container)
+    })
+
+    expect(callback).toBeCalledTimes(1)
+  })
+  it('Cleans up after unmount', async () => {
+    let callback = jest.fn(() => {})
+    await act(async () => {
+      render(createElement(TestUnmountComponent, { callback }), container)
+      unmountComponentAtNode(container)
+    })
+
+    expect(callback).toBeCalledTimes(0)
   })
 })

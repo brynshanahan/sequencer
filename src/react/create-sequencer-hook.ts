@@ -21,8 +21,9 @@ export function createSequencerHook<
     TYield = ExtractYield<TGen>,
     TResult = ExtractResult<TGen>
   >(generatorFn: GennFunction, cacheKeys: any[] = []) {
-    let [process, setProcess] =
-      useState<GeneratorInterface<TResult> | false>(undefined)
+    let [process, setProcess] = useState<GeneratorInterface<TResult> | false>(
+      undefined
+    )
     let [result, setResult] = useState<undefined | TResult>(undefined)
 
     useEffect(() => {
@@ -35,7 +36,7 @@ export function createSequencerHook<
         setProcess(() => undefined)
       })
 
-      return currentProcess.stop
+      return () => currentProcess.stop()
     }, cacheKeys)
 
     return [result, process] as const
